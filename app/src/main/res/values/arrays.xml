@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="pref_sort_options">
+        <item>@string/pref_sort_label_popular</item> Popular
+        <item>@string/pref_sort_label_highRate</item> Top Rated
+        <item>@string/pref_sort_label_upcoming</item> Upcoming
+    </string-array>
+
+    <string-array name="pref_sort_values">
+        <item>@string/pref_sort_popular</item> popular
+        <item>@string/pref_sort_highRate</item> top_rated
+        <item>@string/pref_sort_upcoming</item> upcoming
+    </string-array>
+</resources>
