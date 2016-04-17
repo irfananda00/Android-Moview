@@ -43,8 +43,14 @@ public class GridFragment extends Fragment {
     private SwipeRefreshLayout swipeRefreshLayout;
     private CustomGridLayoutManager mLayoutManager;
     private int pageAPI;
+    private String searchQuery;
 
     public GridFragment() {
+        searchQuery="null";
+    }
+
+    public GridFragment(String searchQuery) {
+        this.searchQuery = searchQuery;
     }
 
     @Override
@@ -110,7 +116,8 @@ public class GridFragment extends Fragment {
             @Override
             public void onLoadMore(int page, int totalItemsCount) {
                 pageAPI++;
-                loadData();
+                if(pageAPI<=GlobalData.maxPage)
+                    loadData();
             }
         });
 
@@ -148,13 +155,20 @@ public class GridFragment extends Fragment {
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
-        DataService.MovieDBApi simpleService = retrofit.create(
-                DataService.MovieDBApi.class);
+        Call<ApiResponse> listCall;
+        if(searchQuery.equalsIgnoreCase("null")) {
+            DataService.MovieDBApi simpleService = retrofit.create(
+                    DataService.MovieDBApi.class);
 
+            listCall = simpleService.getMovie(
+                    GlobalData.key, DataService.API_KEY, pageAPI);
+        }else {
+            DataService.SearchMovieDBApi simpleService = retrofit.create(
+                    DataService.SearchMovieDBApi.class);
 
-        Call<ApiResponse> listCall = simpleService.getMovie(
-                GlobalData.key, DataService.API_KEY, pageAPI);
-
+            listCall = simpleService.getMovie(
+                    DataService.API_KEY, searchQuery);
+        }
         listCall.enqueue(new Callback<ApiResponse>() {
             @Override
             public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
@@ -162,11 +176,13 @@ public class GridFragment extends Fragment {
                     apiResponse = response.body();
                     for (int i = 0; i < apiResponse.getResults().size(); i++) {
                         Film film = apiResponse.getResults().get(i);
+                        GlobalData.maxPage = apiResponse.getTotal_pages();
                         mData.add(film);
                     }
                     gridAdapter.notifyDataSetChanged();
                     swipeRefreshLayout.setRefreshing(false);
                     mLayoutManager.setScrollEnable(true);
+                    searchQuery="null";
                 } else {
                     Snackbar.make(getView(), "Fail access server", Snackbar.LENGTH_LONG)
                             .setAction("RETRY", new View.OnClickListener() {

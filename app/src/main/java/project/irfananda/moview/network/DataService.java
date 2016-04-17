@@ -9,7 +9,7 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public class DataService {
-    public static final String API_KEY = "1b2f29d43bf2e4f3142530bc6929d341";
+    public static final String API_KEY = "136451254291f50e7661446b9450ede6";
     public static final String API_URL = "http://api.themoviedb.org/3/";
     public static final String IMG_URL = "http://image.tmdb.org/t/p/w500/";
 
@@ -19,6 +19,14 @@ public class DataService {
                 @Path("sort_by") String sort,
                 @Query("api_key") String appid,
                 @Query("page") int page
+        );
+    }
+
+    public interface SearchMovieDBApi {
+        @GET("search/movie?")
+        Call<ApiResponse> getMovie(
+                @Query("api_key") String appid,
+                @Query("query") String query
         );
     }
 

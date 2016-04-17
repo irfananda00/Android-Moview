@@ -1,8 +1,10 @@
 package project.irfananda.moview.adapter;
 
 import android.content.Context;
+import android.os.Build;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,10 +59,12 @@ public class GridAdapter extends RecyclerView.Adapter<GridAdapter.MyViewHolder> 
         }
         Picasso.with(context)
                 .load(DataService.IMG_URL+film.getPoster_path())
-                .resize(377,490)
+                .resize(380,500)
                 .placeholder(R.drawable.img_fail)
                 .into(holder.img_poster);
-        holder.bg_desc.setBackgroundResource(RandomImg.getColorID());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            holder.bg_desc.setBackground(context.getDrawable(RandomImg.getColorID()));
+        }
     }
 
     @Override
