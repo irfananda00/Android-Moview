@@ -1,10 +1,11 @@
 package project.irfananda.moview.adapter;
 
 import android.content.Context;
-import android.os.Build;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
+import android.support.v7.graphics.Palette;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,15 +13,17 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
+import project.irfananda.moview.MySwatch;
 import project.irfananda.moview.R;
-import project.irfananda.moview.content.RandomImg;
 import project.irfananda.moview.model.Film;
 import project.irfananda.moview.network.DataService;
 
@@ -30,11 +33,12 @@ public class GridAdapter extends RecyclerView.Adapter<GridAdapter.MyViewHolder> 
     private List<Film> filmList;
     private Context context;
     private Calendar calendar = Calendar.getInstance();
-    private SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd");
+    private SimpleDateFormat parser;
 
     public GridAdapter(List<Film> filmList, Context context) {
         this.filmList = filmList;
         this.context = context;
+        parser = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
     }
 
     @Override
@@ -46,7 +50,7 @@ public class GridAdapter extends RecyclerView.Adapter<GridAdapter.MyViewHolder> 
     }
 
     @Override
-    public void onBindViewHolder(MyViewHolder holder, int position) {
+    public void onBindViewHolder(final MyViewHolder holder, int position) {
         Film film = filmList.get(position);
         holder.txt_title.setText(film.getTitle());
         String release_date = film.getRelease_date();
@@ -59,12 +63,32 @@ public class GridAdapter extends RecyclerView.Adapter<GridAdapter.MyViewHolder> 
         }
         Picasso.with(context)
                 .load(DataService.IMG_URL+film.getPoster_path())
-                .resize(380,500)
+                .resize(300,600)
                 .placeholder(R.drawable.img_fail)
-                .into(holder.img_poster);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            holder.bg_desc.setBackground(context.getDrawable(RandomImg.getColorID()));
-        }
+                .error(R.drawable.img_fail)
+                .into(new Target() {
+                    @Override
+                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                        holder.img_poster.setImageBitmap(bitmap);
+                        Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
+                            @Override
+                            public void onGenerated(Palette palette) {
+                                MySwatch.setCardViewSwatch(holder.bg_desc, palette.getMutedSwatch());
+                                MySwatch.setTextViewSwatch(holder.txt_title, palette.getMutedSwatch());
+                                MySwatch.setTextViewSwatch(holder.txt_release_date, palette.getMutedSwatch());
+                            }
+                        });
+                    }
+                    @Override
+                    public void onBitmapFailed(Drawable errorDrawable) {
+                        holder.img_poster.setImageResource(R.drawable.img_fail);
+                    }
+
+                    @Override
+                    public void onPrepareLoad(Drawable placeHolderDrawable) {
+                        holder.img_poster.setImageResource(R.drawable.img_fail);
+                    }
+                });
     }
 
     @Override

@@ -1,5 +1,7 @@
 package project.irfananda.moview.model;
 
+import io.realm.RealmObject;
+
 public class ProductionCountries{
     private String iso_3166_1;
     private String name;

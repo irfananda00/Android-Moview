@@ -2,7 +2,10 @@ package project.irfananda.moview.model;
 
 import java.util.List;
 
-public class SpecifiedFilm {
+import io.realm.RealmList;
+import io.realm.RealmObject;
+
+public class SpecifiedFilm{
     private boolean adult;
     private String backdrop_path;
     private BelongsToCollection belongs_to_collection;

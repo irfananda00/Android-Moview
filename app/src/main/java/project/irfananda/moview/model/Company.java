@@ -1,34 +1,36 @@
 package project.irfananda.moview.model;
 
-public class Company {
-    private Object description;
-    private Object headquarters;
-    private Object homepage;
+import io.realm.RealmObject;
+
+public class Company{
+    private String description;
+    private String headquarters;
+    private String homepage;
     private int id;
     private String logo_path;
     private String name;
 
-    public Object getDescription() {
+    public String getDescription() {
         return description;
     }
 
-    public void setDescription(Object description) {
+    public void setDescription(String description) {
         this.description = description;
     }
 
-    public Object getHeadquarters() {
+    public String getHeadquarters() {
         return headquarters;
     }
 
-    public void setHeadquarters(Object headquarters) {
+    public void setHeadquarters(String headquarters) {
         this.headquarters = headquarters;
     }
 
-    public Object getHomepage() {
+    public String getHomepage() {
         return homepage;
     }
 
-    public void setHomepage(Object homepage) {
+    public void setHomepage(String homepage) {
         this.homepage = homepage;
     }
 

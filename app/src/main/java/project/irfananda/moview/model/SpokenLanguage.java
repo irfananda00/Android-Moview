@@ -1,5 +1,7 @@
 package project.irfananda.moview.model;
 
+import io.realm.RealmObject;
+
 public class SpokenLanguage{
     private String iso_639_1;
     private String name;

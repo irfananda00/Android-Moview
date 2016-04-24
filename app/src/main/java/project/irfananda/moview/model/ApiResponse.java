@@ -2,8 +2,15 @@ package project.irfananda.moview.model;
 
 import java.util.List;
 
-public class ApiResponse {
+import io.realm.RealmList;
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
+
+public class ApiResponse{
+
+    @PrimaryKey
     private int page;
+
     private List<Film> results;
     private int total_pages;
     private int total_results;

@@ -4,8 +4,10 @@ import android.Manifest;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -13,11 +15,12 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import project.irfananda.moview.GlobalData;
 import project.irfananda.moview.R;
-import project.irfananda.moview.content.RandomImg;
 import project.irfananda.moview.fragment.GridFragment;
 
 public class MainActivity extends AppCompatActivity {
@@ -27,6 +30,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setGlobalData();
+        if(GlobalData.theme.equalsIgnoreCase("dark"))
+            setTheme(R.style.AppThemeDark_Base);
+        else if(GlobalData.theme.equalsIgnoreCase("light"))
+            setTheme(R.style.AppThemeLight_Base);
+        else
+            setTheme(R.style.AppThemeDark_Base);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -37,15 +47,21 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         Fragment fragment = new GridFragment();
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fragment, fragment);
-        ft.commit();
+        changeFragment(fragment,false);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        toolbar.setBackgroundResource(RandomImg.getColorID());
+        if(GlobalData.restart){
+            setGlobalData();
+            Intent i = getBaseContext().getPackageManager()
+                    .getLaunchIntentForPackage(getBaseContext().getPackageName());
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(i);
+            GlobalData.restart = false;
+            Log.i("infoirfan","restart app");
+        }
     }
 
     @Override
@@ -73,10 +89,7 @@ public class MainActivity extends AppCompatActivity {
                 public boolean onQueryTextSubmit(String query)
                 {
                     Fragment fragment = new GridFragment(query);
-                    FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                    ft.replace(R.id.fragment, fragment);
-                    ft.addToBackStack("GridFragmentQuery");
-                    ft.commit();
+                    changeFragment(fragment,true);
                     return true;
                 }
             };
@@ -121,6 +134,21 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
         }
+    }
+
+    private void changeFragment(Fragment fragment, boolean withBackstack){
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.fragment, fragment);
+        if(withBackstack){
+            ft.addToBackStack("BackStackFragment");
+        }
+        ft.commit();
+    }
+
+    private void setGlobalData(){
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        GlobalData.theme = sharedPreferences.getString(getString(R.string.pref_theme_key),
+                getString(R.string.pref_theme_dark));
     }
 
 }

@@ -13,4 +13,14 @@
         <item>@string/pref_sort_upcoming</item>
         <item>@string/pref_sort_nowplaying</item>
     </string-array>
+
+    <string-array name="pref_theme_options">
+        <item>@string/pref_theme_label_dark</item>
+        <item>@string/pref_theme_label_light</item>
+    </string-array>
+
+    <string-array name="pref_theme_values">
+        <item>@string/pref_theme_dark</item>
+        <item>@string/pref_theme_light</item>
+    </string-array>
 </resources>

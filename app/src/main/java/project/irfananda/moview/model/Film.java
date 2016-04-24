@@ -2,7 +2,10 @@ package project.irfananda.moview.model;
 
 import java.util.List;
 
-public class Film {
+import io.realm.RealmList;
+import io.realm.RealmObject;
+
+public class Film{
     private String poster_path;
     private boolean adult;
     private String overview;
@@ -16,7 +19,6 @@ public class Film {
     private int vote_count;
     private boolean video;
     private double vote_average;
-    private List<Integer> genre_ids;
 
     public String getPoster_path() {
         return poster_path;
@@ -120,14 +122,6 @@ public class Film {
 
     public void setVote_average(double vote_average) {
         this.vote_average = vote_average;
-    }
-
-    public List<Integer> getGenre_ids() {
-        return genre_ids;
-    }
-
-    public void setGenre_ids(List<Integer> genre_ids) {
-        this.genre_ids = genre_ids;
     }
 
 }

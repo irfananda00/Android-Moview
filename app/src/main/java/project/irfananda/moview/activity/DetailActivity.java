@@ -1,13 +1,16 @@
 package project.irfananda.moview.activity;
 
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.graphics.Palette;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -16,6 +19,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewStub;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -23,16 +28,15 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
+import project.irfananda.moview.GlobalData;
 import project.irfananda.moview.R;
+import project.irfananda.moview.MySwatch;
 import project.irfananda.moview.adapter.CompanyAdapter;
-import project.irfananda.moview.content.RandomImg;
 import project.irfananda.moview.model.SpecifiedFilm;
 import project.irfananda.moview.network.DataService;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class DetailActivity extends AppCompatActivity {
 
@@ -55,12 +59,21 @@ public class DetailActivity extends AppCompatActivity {
     private TextView txt_vote;
     private TextView txt_countries;
     private RecyclerView rv;
+    private DataService mService;
+    private Call<SpecifiedFilm> mCall;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if(GlobalData.theme.equalsIgnoreCase("dark"))
+            setTheme(R.style.AppThemeDark_Base);
+        else if(GlobalData.theme.equalsIgnoreCase("light"))
+            setTheme(R.style.AppThemeLight_Base);
+        else
+            setTheme(R.style.AppThemeDark_Base);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
+
         setSupportActionBar(toolbar);
         toolbar_layout = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -70,6 +83,7 @@ public class DetailActivity extends AppCompatActivity {
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
         filmID = getIntent().getIntExtra("filmID",0);
+        mService = new DataService();
     }
 
     @Override
@@ -84,18 +98,12 @@ public class DetailActivity extends AppCompatActivity {
         progressBar.setIndeterminate(true);
         progressBar.setVisibility(View.VISIBLE);
 
-        Retrofit retrofit  = new Retrofit.Builder()
-                .baseUrl(DataService.API_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+        DataService.SpecifiedMovieDBApi simpleService = mService.serviceSpecifiedMovieDBApi();
 
-        DataService.SpecifiedMovieDBApi simpleService = retrofit.create(
-                DataService.SpecifiedMovieDBApi.class);
-
-        Call<SpecifiedFilm> listCall = simpleService.getMovie(
+        mCall = simpleService.getMovie(
                 filmID,DataService.API_KEY);
 
-        listCall.enqueue(new Callback<SpecifiedFilm>() {
+        mCall.enqueue(new Callback<SpecifiedFilm>() {
             @Override
             public void onResponse(Call<SpecifiedFilm> call, Response<SpecifiedFilm> response) {
                 if (response.isSuccessful()) {
@@ -192,16 +200,29 @@ public class DetailActivity extends AppCompatActivity {
                     @Override
                     public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
                         toolbar_layout.setBackground(new BitmapDrawable(getResources(),bitmap));
+                        Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
+                            @Override
+                            public void onGenerated(Palette palette) {
+                                MySwatch.setCollapsingToolbarSwatch( toolbar_layout, palette.getMutedSwatch());
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                    Window window = getWindow();
+                                    window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+                                    window.setStatusBarColor(palette.getDarkMutedColor(getResources().getColor(android.R.color.black)));
+                                }
+                                MySwatch.setTextViewSwatch( txt_title, palette.getMutedSwatch() );
+                                MySwatch.setTextViewSwatch( txt_status, palette.getVibrantSwatch() );
+                                MySwatch.setTextViewSwatch( txt_rateGood, palette.getVibrantSwatch() );
+                                MySwatch.setTextViewSwatch( txt_vote, palette.getVibrantSwatch() );
+                            }
+                        });
                     }
 
                     @Override
                     public void onBitmapFailed(Drawable errorDrawable) {
-                        toolbar_layout.setBackgroundResource(RandomImg.getColorID());
                     }
 
                     @Override
                     public void onPrepareLoad(Drawable placeHolderDrawable) {
-                        toolbar_layout.setBackgroundResource(RandomImg.getColorID());
                     }
                 });
         Picasso.with(this)
@@ -240,16 +261,8 @@ public class DetailActivity extends AppCompatActivity {
         txt_countries.setText(country);
         txt_rateGood.setText("Rating : "+specifiedFilm.getVote_average());
         txt_vote.setText(    "Vote     : "+specifiedFilm.getVote_count());
-
-        setUIColour();
     }
 
-    private void setUIColour() {
-        toolbar_layout.setContentScrimResource(RandomImg.getColorID());
-        txt_title.setBackgroundResource(RandomImg.getColorID());
-        txt_status.setBackgroundResource(RandomImg.getColorID());
-        txt_rateGood.setBackgroundResource(RandomImg.getColorID());
-        txt_vote.setBackgroundResource(RandomImg.getColorID());
-    }
+
 
 }

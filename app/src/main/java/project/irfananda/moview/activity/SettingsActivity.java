@@ -8,6 +8,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.LayoutRes;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 
 import project.irfananda.moview.GlobalData;
@@ -20,6 +21,12 @@ public class SettingsActivity extends PreferenceActivity
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        if(GlobalData.theme.equalsIgnoreCase("dark"))
+            setTheme(R.style.AppThemeDark_Base);
+        else if(GlobalData.theme.equalsIgnoreCase("light"))
+            setTheme(R.style.AppThemeLight_Base);
+        else
+            setTheme(R.style.AppThemeDark_Base);
         super.onCreate(savedInstanceState);
         // Add 'general' preferences, defined in the XML file
         // TODO: Add preferences from XML
@@ -35,6 +42,7 @@ public class SettingsActivity extends PreferenceActivity
         // updated when the preference changes.
         // TODO: Add preferences
         bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_sort_key)));
+        bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_theme_key)));
     }
 
     /**
@@ -60,10 +68,23 @@ public class SettingsActivity extends PreferenceActivity
 
         if (preference instanceof ListPreference) {
             ListPreference listPreference = (ListPreference) preference;
-            int prefIndex = listPreference.findIndexOfValue(stringValue);
-            if (prefIndex >= 0) {
-                GlobalData.refresh = !GlobalData.key.equals(listPreference.getEntryValues()[prefIndex].toString());
-                preference.setSummary(listPreference.getEntries()[prefIndex]);
+            if (listPreference.getTitle().equals(getResources().getString(R.string.pref_sort_label))) {
+                int prefIndex = listPreference.findIndexOfValue(stringValue);
+                if (prefIndex >= 0) {
+                    GlobalData.refresh = !GlobalData.key.equals(listPreference.getEntryValues()[prefIndex].toString());
+                    preference.setSummary(listPreference.getEntries()[prefIndex]);
+                }
+            }else if (listPreference.getTitle().equals(getResources().getString(R.string.pref_theme_label))) {
+                int prefIndex = listPreference.findIndexOfValue(stringValue);
+                if (prefIndex >= 0) {
+                    //set theme to preferences and restart apps
+                    Log.i("infoirfan","Selected Theme : "+listPreference.getEntries()[prefIndex].toString());
+                    preference.setSummary(listPreference.getEntries()[prefIndex]);
+                    if(!GlobalData.theme.equals(listPreference.getEntryValues()[prefIndex].toString())) {
+                        GlobalData.theme = listPreference.getEntryValues()[prefIndex].toString();
+                        GlobalData.restart = true;
+                    }
+                }
             }
         }
         return true;

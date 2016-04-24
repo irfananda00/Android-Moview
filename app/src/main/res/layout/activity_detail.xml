@@ -12,8 +12,7 @@
         android:id="@+id/app_bar"
         android:fitsSystemWindows="true"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/app_bar_height"
-        android:theme="@style/ThemeToolbarOverflowLight">
+        android:layout_height="@dimen/app_bar_height">
 
         <android.support.design.widget.CollapsingToolbarLayout
             android:id="@+id/toolbar_layout"
@@ -26,7 +25,6 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:popupTheme="@style/AppTheme.PopupOverlay"
             android:background="?android:attr/selectableItemBackground"
             android:clickable="true"
             app:layout_collapseMode="pin"/>

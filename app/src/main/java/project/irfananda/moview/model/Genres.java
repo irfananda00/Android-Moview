@@ -1,5 +1,7 @@
 package project.irfananda.moview.model;
 
+import io.realm.RealmObject;
+
 public class Genres{
     private int id;
     private String name;

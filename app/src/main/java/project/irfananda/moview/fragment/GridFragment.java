@@ -2,6 +2,7 @@ package project.irfananda.moview.fragment;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -17,6 +18,7 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.realm.Realm;
 import project.irfananda.moview.ClickListener;
 import project.irfananda.moview.GlobalData;
 import project.irfananda.moview.R;
@@ -31,8 +33,6 @@ import project.irfananda.moview.recyclerView.RecyclerTouchListener;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class GridFragment extends Fragment {
 
@@ -44,6 +44,9 @@ public class GridFragment extends Fragment {
     private CustomGridLayoutManager mLayoutManager;
     private int pageAPI;
     private String searchQuery;
+    private Realm mRealm;
+    private DataService mService;
+    private Call<ApiResponse> mCall;
 
     public GridFragment() {
         searchQuery="null";
@@ -57,6 +60,7 @@ public class GridFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         gridAdapter = new GridAdapter(mData,getActivity());
+        mService = new DataService();
     }
 
     @Override
@@ -66,12 +70,8 @@ public class GridFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_main, container, false);
 
         swipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipeRefreshLayout);
-        swipeRefreshLayout.setColorSchemeResources(
-                R.color.colorCard1,
-                R.color.colorCard2,
-                R.color.colorCard3,
-                R.color.colorCard4,
-                R.color.colorCard5);
+        swipeRefreshLayout.setColorSchemeColors(
+                Color.RED,Color.YELLOW);
         rv = (RecyclerView) v.findViewById(R.id.rv);
 
         if(getResources().getConfiguration().orientation==1) {
@@ -109,6 +109,7 @@ public class GridFragment extends Fragment {
 
             @Override
             public void onLongClick(View view, int position) {
+
             }
         }));
 
@@ -150,26 +151,18 @@ public class GridFragment extends Fragment {
 
         setGlobalData();
 
-        Retrofit retrofit  = new Retrofit.Builder()
-                .baseUrl(DataService.API_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        Call<ApiResponse> listCall;
         if(searchQuery.equalsIgnoreCase("null")) {
-            DataService.MovieDBApi simpleService = retrofit.create(
-                    DataService.MovieDBApi.class);
-
-            listCall = simpleService.getMovie(
-                    GlobalData.key, DataService.API_KEY, pageAPI);
+            DataService.MovieDBApi movieDBApi = mService.serviceMovieDBApi();
+            mCall = movieDBApi.getMovie(
+                    GlobalData.key, DataService.API_KEY, pageAPI
+            );
         }else {
-            DataService.SearchMovieDBApi simpleService = retrofit.create(
-                    DataService.SearchMovieDBApi.class);
-
-            listCall = simpleService.getMovie(
-                    DataService.API_KEY, searchQuery);
+            DataService.SearchMovieDBApi movieDBApi = mService.serviceSearchMovieDBApi();
+            mCall = movieDBApi.getMovie(
+                    DataService.API_KEY, searchQuery
+            );
         }
-        listCall.enqueue(new Callback<ApiResponse>() {
+        mCall.enqueue(new Callback<ApiResponse>() {
             @Override
             public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
                 if (response.isSuccessful()) {
